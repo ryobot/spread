@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title></title>
+<script src="refrction.js" language="javascript"></script>
+<script type="text/javascript">
+<!--
+   var context;
+   var src_img;
+   
+   window.onload = function() {
+       var canvas = document.getElementById("canvas");
+       context = canvas.getContext("2d");
+
+       var image = context.getImageData(0, 0, 1209, 597);
+       for (var i = 0; i < image.height; i++) {
+           for (var j = 0; j < image.width; j++) {
+               image.data[(i * image.width + j) * 4 + 0] = 255;
+               image.data[(i * image.width + j) * 4 + 1] = 0;
+               image.data[(i * image.width + j) * 4 + 2] = 0;
+               image.data[(i * image.width + j) * 4 + 3] = 255;
+           }
+       }
+       context.putImageData(image, 0, 0);
+       src_img = document.getElementById('src_image');
+   }
+
+   function copyImage() {
+      context.drawImage(src_img, 0, 0);
+   }
+   function refractImage() {
+       var src = context.getImageData(0, 0, 1209, 597);
+       var dst = context.createImageData(1209, 597);
+       refract( src, dst );
+       context.putImageData(dst, 0, 0);
+   }
+-->
+</script>
+</head>
+<body>
+<table><tr><td>
+<img id="src_image" src="sample_map.png" width="1209" height="597">
+</td></tr><tr><td>
+<button id="copy_image" onClick="copyImage()">copy</button>
+<button id="refract_image" onClick="refractImage()">refract</button>
+</td></tr><tr><td>
+<canvas id="canvas" width="1209" height="597"></canvas>
+</td></tr></table>
+</body>
+</html>

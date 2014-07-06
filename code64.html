@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>code64 test</title>
+<script src="spread.js" language="javascript"></script>
+<script language="javascript">
+<!--
+function onEdit() {
+  el_in = document.getElementById("intext");
+  el_enc = document.getElementById("encoded");
+  el_dec = document.getElementById("decoded");
+  el_jud = document.getElementById("judge");
+  encoded_str = en64code(el_in.value);
+  el_enc.innerHTML = encoded_str;
+  decoded_str = de64code(encoded_str);
+  el_dec.innerHTML = decoded_str;
+  if ( el_in.value == decoded_str ) {
+    el_jud.innerHTML = "correct";
+  } else {
+    el_jud.innerHTML = "incorrect";
+  }
+}
+-->
+</script>
+</head>
+<body>
+<div align="center">
+<input id="intext" type=text name="intext" size=200/> -->
+<p><button onclick="onEdit()">decode</button></p>
+<p><span id="encoded">encoded</span></p>
+<p><span id="decoded">decoded</span></p>
+<p><span id="judge">judge</span></p>
+</div>
+</body>
+</html>
