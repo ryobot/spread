@@ -63,7 +63,8 @@ function refract( src_image, dst_image ) {
         for (var j = 0; j < dst_image.width; j++) {
             var pos = refracted(j, i);
             var rgba = get_float_pixel(src_image, pos.x, pos.y);
-            var val = wave(i, j);
+            //var val = wave(i, j);
+            var val = 1.0;
             dst_image.data[(i * dst_image.width + j) * 4 + 0] = rgba.r * val;
             dst_image.data[(i * dst_image.width + j) * 4 + 1] = rgba.g * val;
             dst_image.data[(i * dst_image.width + j) * 4 + 2] = rgba.b * val;

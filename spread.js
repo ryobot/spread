@@ -318,6 +318,8 @@ function greyer ( image, ratio ) {
 }
 
 var rfrctd;
+var rfrctd_blu;
+var rfrctd_grn;
 
 function draw_canvas () {
     var bg_img = document.getElementById("bg_img");
@@ -329,7 +331,18 @@ function draw_canvas () {
     var src = bg_context.getImageData(0, 0, 640, 448);
     rfrctd = bg_context.createImageData(640, 448);
     refract(src, rfrctd);
-    //color_adjust(rfrctd,1.02,1.02,1.02);
-    greyer(rfrctd, 0.05);
+    greyer(rfrctd, 0.2);
+    color_adjust(rfrctd,1.2,1.0,1.0);
+
+    rfrctd_blu = bg_context.createImageData(640, 448);
+    refract(src, rfrctd_blu);
+    greyer(rfrctd_blu, 0.2);
+    color_adjust(rfrctd_blu,1.0,1.0,1.2);
+    
+    rfrctd_grn = bg_context.createImageData(640, 448);
+    refract(src, rfrctd_grn);
+    greyer(rfrctd_grn, 0.2);
+    color_adjust(rfrctd_grn,1.0,1.2,1.0);
+    
     init_tables();
 }

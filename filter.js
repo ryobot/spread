@@ -5,6 +5,7 @@ var heightsData = new Array();
 
 function filter_alpha_block (image, x, y, decoded) {
     var n = get_neighbors(x, y, decoded);
+    var g = get_group(x, y, decoded);
     var dataFound = -1;
     for ( var i = 0; i < neighborsData.length; i++) {
         if ( neighborsData[i] == n ) {
@@ -13,12 +14,12 @@ function filter_alpha_block (image, x, y, decoded) {
         }
     }
     if ( dataFound >= 0 ) {
-        set_alpha_block(image, x, y, alphasData[dataFound], heightsData[dataFound]);
+        set_alpha_block(image, x, y, alphasData[dataFound], heightsData[dataFound], g);
     } else {
         var maps = get_alphas(n);
         var alphas = maps.a;
         var heights = maps.h;
-        set_alpha_block(image, x, y, alphas, heights);
+        set_alpha_block(image, x, y, alphas, heights, g);
         neighborsData.push(n);
         alphasData.push(alphas);
         heightsData.push(heights);
@@ -26,13 +27,16 @@ function filter_alpha_block (image, x, y, decoded) {
 }
 
 function is_neighbors_changed (x, y, decoded) {
+    var pos = x*y_width + y;
+    if ( decoded.charAt(pos) != prev_str.charAt(pos) ) {
+        return true;
+    }
     for ( var i = -2; i <= 2; i++ ) {
         for ( var j = -2; j <= 2; j++ ) {
-            //if ( x + i < 0 || y + j < 0 || x + i >= x_width || y + j >= y_width || x*x + y*y == 4 ) {
             if ( x + i < 0 || y + j < 0 || x + i >= x_width || y + j >= y_width ) {
                 continue;
             }
-            var pos = (x + i)*y_width + y + j;
+            pos = (x + i)*y_width + y + j;
             if ( decoded.charAt(pos) == "0" && prev_str.charAt(pos) != "0" ) {
                 return true;
             }
@@ -42,6 +46,11 @@ function is_neighbors_changed (x, y, decoded) {
         }
     }
     return false;
+}
+
+function get_group (x, y, decoded) {
+    var pos = x*y_width + y;
+    return decoded.charAt(pos);
 }
 
 function get_neighbors (x, y, decoded) {
@@ -164,15 +173,22 @@ function byColor ( col, by ) {
     return val;
 }
 
-function set_alpha_block (image, x, y, alphas, heights) {
+function set_alpha_block (image, x, y, alphas, heights, group) {
     var cur = 0;
+    var layer = rfrctd;
+    if ( group == '2' ) {
+        layer = rfrctd_blu;
+    }
+    if ( group == '3' ) {
+        layer = rfrctd_grn;
+    }
     for (var j = x*block_size; j < (x + 1)*block_size; j++) {
         for (var i = y*block_size; i < (y + 1)*block_size; i++) {
             alpha = linar255tbl[alphas.charAt(cur)];
             by = linarByTbl[heights.charAt(cur++)];
-            image.data[(i * image.width + j) * 4 + 0] = byColor(rfrctd.data[(i * image.width + j) * 4 + 0], by);
-            image.data[(i * image.width + j) * 4 + 1] = byColor(rfrctd.data[(i * image.width + j) * 4 + 1], by);
-            image.data[(i * image.width + j) * 4 + 2] = byColor(rfrctd.data[(i * image.width + j) * 4 + 2], by);
+            image.data[(i * image.width + j) * 4 + 0] = byColor(layer.data[(i * image.width + j) * 4 + 0], by);
+            image.data[(i * image.width + j) * 4 + 1] = byColor(layer.data[(i * image.width + j) * 4 + 1], by);
+            image.data[(i * image.width + j) * 4 + 2] = byColor(layer.data[(i * image.width + j) * 4 + 2], by);
             image.data[(i * image.width + j) * 4 + 3] = alpha;
         }
     }
