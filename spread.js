@@ -7,6 +7,12 @@ var prev_str = "";
 var lasttime = "0";
 var bufData = new Array();
 var bufGroup = new Array();
+var fieldData = new Array();
+
+// init field array:
+for ( x = 0; x < x_width; ++x) {
+    fieldData[x] = new Array(y_width);
+}
 
 //         0         10        20        30        40        50        60
 //         +----+----+----+----+----+----+----+----+----+----+----+----+---
@@ -113,6 +119,15 @@ function notc(str) {
     }
 }
 
+function ref2int(char) {
+    var val = 0;
+    while ( ref.charAt(val) != char ) {
+        val++;
+        if ( val == 64 ) break;
+    }
+    return val;
+}
+
 function de64code(str, groupStr) {
 //function de64code(str) {
     //         0         10        20        30        40        50        60
@@ -120,6 +135,8 @@ function de64code(str, groupStr) {
     //var ref = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
     var decoded = "";
     var pos = 0;
+    var field_x = 0;
+    var field_y = 0;
     var groupPos = 0;
     var addchar = "0";
     for ( i = 0; i < str.length; i++ ) {
@@ -127,6 +144,11 @@ function de64code(str, groupStr) {
         var pos = 0;
         while ( ref.charAt(pos++) != c ) {
             decoded = decoded + addchar;
+            fieldData[field_x][field_y] = ref2int(addchar);
+            if ( ++field_y == y_width ) {
+                field_y = 0;
+                field_x++;
+            }
         }
         if ( c != "/" ) {
             addchar = notc(addchar);

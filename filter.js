@@ -3,9 +3,9 @@ var neighborsData = new Array();
 var alphasData = new Array();
 var heightsData = new Array();
 
-function filter_alpha_block (image, x, y, decoded) {
-    var n = get_neighbors(x, y, decoded);
-    var g = get_group(x, y, decoded);
+function filter_alpha_block (image, x, y) {
+    var n = get_neighbors(x, y);
+    var g = get_group(x, y);
     var dataFound = -1;
     for ( var i = 0; i < neighborsData.length; i++) {
         if ( neighborsData[i] == n ) {
@@ -48,12 +48,11 @@ function is_neighbors_changed (x, y, decoded) {
     return false;
 }
 
-function get_group (x, y, decoded) {
-    var pos = x*y_width + y;
-    return decoded.charAt(pos);
+function get_group (x, y) {
+    return fieldData[x][y] % 3;
 }
 
-function get_neighbors (x, y, decoded) {
+function get_neighbors (x, y) {
     var neighbors = "";
     for ( var i = -2; i <= 2; i++ ) {
         for ( var j = -2; j <= 2; j++ ) {
@@ -62,8 +61,9 @@ function get_neighbors (x, y, decoded) {
                 neighbors += "0";
                 continue;
             }
-            var pos = (x + i)*y_width + y + j;
-            if ( decoded.charAt(pos) == "0" ) {
+            //var pos = (x + i)*y_width + y + j;
+            //if ( decoded.charAt(pos) == "0" ) {
+            if ( fieldData[x + i][y + j] == 0 ) {
                 neighbors += "0";
             } else {
                 neighbors += "1";
@@ -176,10 +176,10 @@ function byColor ( col, by ) {
 function set_alpha_block (image, x, y, alphas, heights, group) {
     var cur = 0;
     var layer = rfrctd;
-    if ( group == '2' ) {
+    if ( group == 1 ) {
         layer = rfrctd_blu;
     }
-    if ( group == '3' ) {
+    if ( group == 2 ) {
         layer = rfrctd_grn;
     }
     for (var j = x*block_size; j < (x + 1)*block_size; j++) {
