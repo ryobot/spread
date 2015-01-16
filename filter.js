@@ -2,6 +2,7 @@
 var neighborsData = new Array();
 var alphasData = new Array();
 var heightsData = new Array();
+var rectData = new Array();
 
 function filter_alpha_block (image, x, y) {
     var n = get_neighbors(x, y);
@@ -9,21 +10,17 @@ function filter_alpha_block (image, x, y) {
     var dataFound = -1;
     for ( var i = 0; i < neighborsData.length; i++) {
         if ( neighborsData[i] == n ) {
-           dataFound = i;
-           break;
+           set_alpha_block(image, x, y, alphasData[i], heightsData[i], g);
+           return;
         }
     }
-    if ( dataFound >= 0 ) {
-        set_alpha_block(image, x, y, alphasData[dataFound], heightsData[dataFound], g);
-    } else {
-        var maps = get_alphas(n);
-        var alphas = maps.a;
-        var heights = maps.h;
-        set_alpha_block(image, x, y, alphas, heights, g);
-        neighborsData.push(n);
-        alphasData.push(alphas);
-        heightsData.push(heights);
-    }
+    var maps = get_alphas(n);
+    var alphas = maps.a;
+    var heights = maps.h;
+    set_alpha_block(image, x, y, alphas, heights, g);
+    neighborsData.push(n);
+    alphasData.push(alphas);
+    heightsData.push(heights);
 }
 
 function is_neighbors_changed (x, y) {
@@ -43,8 +40,54 @@ function is_neighbors_changed (x, y) {
     return false;
 }
 
+function is_neighbors_notzero(x, y) {
+    if ( fieldData[current][x][y] > 0 ) {
+        return true;
+    }
+    for ( var i = -2; i <= 2; i++ ) {
+        for ( var j = -2; j <= 2; j++ ) {
+            if ( x + i < 0 || y + j < 0 || x + i >= x_width || y + j >= y_width ) {
+                continue;
+            }
+            if ( fieldData[current][x + i][y + j] > 0 && fieldData[prev][x + i][y + j] == 0 ) {
+                return true;
+            }
+            if ( fieldData[current][x + i][y + j] == 0 && fieldData[prev][x + i][y + j] > 0 ) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function clear_rect_data() {
+    rectData.length = 0;
+}
+
+function get_group_rect(group) {
+    for (i = 0; i < rectData.length; i++) {
+        if ( rectData[i].group == group ) {
+            return rectData[i];
+        }
+    }
+    var min = 1000;
+    var max = 0;
+    for ( x = 0; x < x_width; x++ ) {
+        for ( y = 0; y < y_width; y++ ) {
+            if ( fieldData[current][x][y] == group ) {
+                val = x + y;
+                if ( val < min ) min = val;
+                if ( val > max ) max = val;
+            }
+        }
+    }
+    var rect = { group:group, min:min, max:max };
+    rectData.push(rect);
+    return rect;
+}
+
 function get_group (x, y) {
-    return fieldData[current][x][y] % 3;
+    return fieldData[current][x][y];
 }
 
 function get_neighbors (x, y) {
@@ -165,22 +208,31 @@ function byColor ( col, by ) {
     return val;
 }
 
+function get_rect_offset(x, y, max, min) {
+    var val = 0.7 + 0.3*Math.cos(Math.PI*(x + y - min)/(max - min)/2);
+    return val;
+}
+
 function set_alpha_block (image, x, y, alphas, heights, group) {
     var cur = 0;
     var layer = rfrctd;
-    if ( group == 1 ) {
-        layer = rfrctd_blu;
-    }
-    if ( group == 2 ) {
-        layer = rfrctd_grn;
-    }
+    //if ( group%3 == 1 ) {
+    //    layer = rfrctd_blu;
+    //}
+    //if ( group%3 == 2 ) {
+    //    layer = rfrctd_grn;
+    //}
+    var rect = get_group_rect(group);
+    var rectMax = rect.max*block_size;
+    var rectMin = rect.min*block_size;
     for (var j = x*block_size; j < (x + 1)*block_size; j++) {
         for (var i = y*block_size; i < (y + 1)*block_size; i++) {
             alpha = linar255tbl[alphas.charAt(cur)];
             by = linarByTbl[heights.charAt(cur++)];
-            image.data[(i * image.width + j) * 4 + 0] = byColor(layer.data[(i * image.width + j) * 4 + 0], by);
-            image.data[(i * image.width + j) * 4 + 1] = byColor(layer.data[(i * image.width + j) * 4 + 1], by);
-            image.data[(i * image.width + j) * 4 + 2] = byColor(layer.data[(i * image.width + j) * 4 + 2], by);
+            rectBy = get_rect_offset(j, i, rectMax, rectMin);
+            image.data[(i * image.width + j) * 4 + 0] = byColor(layer.data[(i * image.width + j) * 4 + 0], by*rectBy);
+            image.data[(i * image.width + j) * 4 + 1] = byColor(layer.data[(i * image.width + j) * 4 + 1], by*rectBy);
+            image.data[(i * image.width + j) * 4 + 2] = byColor(layer.data[(i * image.width + j) * 4 + 2], by*rectBy);
             image.data[(i * image.width + j) * 4 + 3] = alpha;
         }
     }

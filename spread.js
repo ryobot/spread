@@ -180,13 +180,14 @@ function update_field()
         bufGroup.shift();
         toggleCurrentField();
         de64code(str, groupStr);
+        clear_rect_data();
         var canvas = document.getElementById("canvas");
         var context = canvas.getContext("2d");
         var image = context.getImageData(0, 0, block_size*x_width, block_size*y_width);
         var pos = 0;
         for (var x = 0; x < x_width; x++) {
             for (var y = 0; y < y_width; y++) {
-                if ( is_neighbors_changed(x, y) ) {
+                if ( is_neighbors_notzero(x, y) ) {
                    filter_alpha_block(image, x, y);
                 }
             }
@@ -318,8 +319,8 @@ function greyer ( image, ratio ) {
 }
 
 var rfrctd;
-var rfrctd_blu;
-var rfrctd_grn;
+//var rfrctd_blu;
+//var rfrctd_grn;
 
 function draw_canvas () {
     var bg_img = document.getElementById("bg_img");
@@ -331,18 +332,18 @@ function draw_canvas () {
     var src = bg_context.getImageData(0, 0, 640, 448);
     rfrctd = bg_context.createImageData(640, 448);
     refract(src, rfrctd);
-    greyer(rfrctd, 0.2);
-    color_adjust(rfrctd,1.2,1.0,1.0);
+    greyer(rfrctd, 0.1);
+    //color_adjust(rfrctd,1.2,1.0,1.0);
 
-    rfrctd_blu = bg_context.createImageData(640, 448);
-    refract(src, rfrctd_blu);
-    greyer(rfrctd_blu, 0.2);
-    color_adjust(rfrctd_blu,1.0,1.0,1.2);
+    //rfrctd_blu = bg_context.createImageData(640, 448);
+    //refract(src, rfrctd_blu);
+    //greyer(rfrctd_blu, 0.2);
+    //color_adjust(rfrctd_blu,1.0,1.0,1.2);
     
-    rfrctd_grn = bg_context.createImageData(640, 448);
-    refract(src, rfrctd_grn);
-    greyer(rfrctd_grn, 0.2);
-    color_adjust(rfrctd_grn,1.0,1.2,1.0);
+    //rfrctd_grn = bg_context.createImageData(640, 448);
+    //refract(src, rfrctd_grn);
+    //greyer(rfrctd_grn, 0.2);
+    //color_adjust(rfrctd_grn,1.0,1.2,1.0);
     
     init_tables();
 }
