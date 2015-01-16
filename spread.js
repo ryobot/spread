@@ -3,15 +3,19 @@ var x_width = 160;
 var y_width = 112;
 var block_size = 4;
 var running = false;
-var prev_str = "";
 var lasttime = "0";
 var bufData = new Array();
 var bufGroup = new Array();
-var fieldData = new Array();
+var fieldData = new Array(2);
+var current = 0;
+var prev = 1;
 
 // init field array:
+fieldData[0] = new Array();
+fieldData[1] = new Array();
 for ( x = 0; x < x_width; ++x) {
-    fieldData[x] = new Array(y_width);
+    fieldData[0][x] = new Array(y_width);
+    fieldData[1][x] = new Array(y_width);
 }
 
 //         0         10        20        30        40        50        60
@@ -33,31 +37,17 @@ if (window.ActiveXObject && !window.XMLHttpRequest)
     }
 }
 
-function init_prev_str() {
-    prev_str = "";
-    var tmp_str = "";   
+function init_field() {
     for ( x = 0; x < x_width; x++ ) {
-        tmp_str += "0";
-    }
-    for ( y = 0; y < y_width; y++ ) {
-        prev_str += tmp_str;
+        for ( y = 0; y < y_width; y++ ) {
+            fieldData[current][x][y] = 0;
+        }
     }
 }
 
-/*
-function changeImage(x, y, chk) {
-  name = x.toString() + "_" + y.toString();
-  el = document.getElementById(name);
-  if ( chk ) {
-    el.src = "on_mini.png";
-  } else {
-    el.src = "off_mini.png";
-  }
-}*/
-
 function start() {
     running = true;
-    init_prev_str();
+    init_field();
     request_spread_data();
     update_field();
     document.getElementById("btn_start").disabled = true;
@@ -68,8 +58,6 @@ function stop() {
     running = false;
     document.getElementById("btn_stop").disabled = true;
     document.getElementById("btn_start").disabled = false;
-    //el = document.getElementById("filterdata");
-    //el.innerHTML = dump_filter_data();
 }
 
 function request_spread_data()
@@ -133,7 +121,6 @@ function de64code(str, groupStr) {
     //         0         10        20        30        40        50        60
     //         +----+----+----+----+----+----+----+----+----+----+----+----+---
     //var ref = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
-    var decoded = "";
     var pos = 0;
     var field_x = 0;
     var field_y = 0;
@@ -143,8 +130,7 @@ function de64code(str, groupStr) {
         c = str.charAt(i);
         var pos = 0;
         while ( ref.charAt(pos++) != c ) {
-            decoded = decoded + addchar;
-            fieldData[field_x][field_y] = ref2int(addchar);
+            fieldData[current][field_x][field_y] = ref2int(addchar);
             if ( ++field_y == y_width ) {
                 field_y = 0;
                 field_x++;
@@ -157,7 +143,6 @@ function de64code(str, groupStr) {
             }
         }
     }
-    return decoded;
 }
 
 function clean_field() {
@@ -167,52 +152,46 @@ function clean_field() {
     var pos = 0;
     for ( x = 0; x < x_width; x++ ) {
         for ( y = 0; y < y_width; y++ ) {
-            //changeImage( x, y, false );
              draw_block(image, x, y, 255, 0, 0, 20);
         }
     }
     context.putImageData(image, 0, 0);
     bufData.length = 0;
-    init_prev_str();
+    init_field();
+}
+
+function toggleCurrentField() {
+    if ( current == 0 ) {
+        current = 1;
+        prev = 0;
+    } else {
+        current = 0;
+        prev = 1;
+    }
 }
 
 function update_field()
 {
     var groupStr = "";
-    var decoded = "";
     if ( bufData.length > 0 ) {
         str = bufData[0];
         bufData.shift();
         groupStr = bufGroup[0];
         bufGroup.shift();
-        decoded = de64code(str, groupStr);
-        //decoded = de64code(str);
+        toggleCurrentField();
+        de64code(str, groupStr);
         var canvas = document.getElementById("canvas");
         var context = canvas.getContext("2d");
         var image = context.getImageData(0, 0, block_size*x_width, block_size*y_width);
         var pos = 0;
         for (var x = 0; x < x_width; x++) {
             for (var y = 0; y < y_width; y++) {
-                /*
-                c = decoded.charAt(pos);
-                if ( c != prev_str.charAt(pos) ) {
-                   //changeImage( x, y, ( c == "1" ) );
-                   if ( c == "1" ) {
-                      alpha_block(image, x, y, 100);
-                   } else {
-                      alpha_block(image, x, y, 10);
-                   }
-                }
-                pos++;
-                */
-                if ( is_neighbors_changed(x, y, decoded) ) {
-                   filter_alpha_block(image, x, y, decoded);
+                if ( is_neighbors_changed(x, y) ) {
+                   filter_alpha_block(image, x, y);
                 }
             }
         }
         context.putImageData(image, 0, 0);
-
-        prev_str = decoded;
     }
 
     var parsedStr = "buffer num : " + bufData.length + "<br>";
@@ -287,7 +266,6 @@ function draw_block (image, x, y, r, g, b, alpha) {
 function alpha_block (image, x, y, alpha) {
     for (var i = y*block_size; i < (y + 1)*block_size; i++) {
         for (var j = x*block_size; j < (x + 1)*block_size; j++) {
-            //image.data[(i * image.width + j) * 4 + 2] = 255;
             image.data[(i * image.width + j) * 4 + 3] = alpha;
         }
     }

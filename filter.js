@@ -26,9 +26,8 @@ function filter_alpha_block (image, x, y) {
     }
 }
 
-function is_neighbors_changed (x, y, decoded) {
-    var pos = x*y_width + y;
-    if ( decoded.charAt(pos) != prev_str.charAt(pos) ) {
+function is_neighbors_changed (x, y) {
+    if ( fieldData[current][x][y] != fieldData[prev][x][y] ) {
         return true;
     }
     for ( var i = -2; i <= 2; i++ ) {
@@ -36,11 +35,7 @@ function is_neighbors_changed (x, y, decoded) {
             if ( x + i < 0 || y + j < 0 || x + i >= x_width || y + j >= y_width ) {
                 continue;
             }
-            pos = (x + i)*y_width + y + j;
-            if ( decoded.charAt(pos) == "0" && prev_str.charAt(pos) != "0" ) {
-                return true;
-            }
-            if ( decoded.charAt(pos) != "0" && prev_str.charAt(pos) == "0" ) {
+            if ( fieldData[current][x + i][y + j] != fieldData[prev][x + i][y + j] ) {
                 return true;
             }
         }
@@ -49,21 +44,18 @@ function is_neighbors_changed (x, y, decoded) {
 }
 
 function get_group (x, y) {
-    return fieldData[x][y] % 3;
+    return fieldData[current][x][y] % 3;
 }
 
 function get_neighbors (x, y) {
     var neighbors = "";
     for ( var i = -2; i <= 2; i++ ) {
         for ( var j = -2; j <= 2; j++ ) {
-            //if (x + i < 0 || y + j < 0 || x + i >= x_width || y + j >= y_width || x*x + y*y == 4 ) {
             if (x + i < 0 || y + j < 0 || x + i >= x_width || y + j >= y_width ) {
                 neighbors += "0";
                 continue;
             }
-            //var pos = (x + i)*y_width + y + j;
-            //if ( decoded.charAt(pos) == "0" ) {
-            if ( fieldData[x + i][y + j] == 0 ) {
+            if ( fieldData[current][x + i][y + j] == 0 ) {
                 neighbors += "0";
             } else {
                 neighbors += "1";
