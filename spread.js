@@ -173,6 +173,7 @@ function toggleCurrentField() {
 function update_field()
 {
     var groupStr = "";
+    var updated = 0;
     if ( bufData.length > 0 ) {
         str = bufData[0];
         bufData.shift();
@@ -184,18 +185,18 @@ function update_field()
         var canvas = document.getElementById("canvas");
         var context = canvas.getContext("2d");
         var image = context.getImageData(0, 0, block_size*x_width, block_size*y_width);
-        var pos = 0;
         for (var x = 0; x < x_width; x++) {
             for (var y = 0; y < y_width; y++) {
                 if ( is_neighbors_notzero(x, y) ) {
                    filter_alpha_block(image, x, y);
+                   updated++;
                 }
             }
         }
         context.putImageData(image, 0, 0);
     }
 
-    var parsedStr = "buffer num : " + bufData.length + "<br>";
+    var parsedStr = "buffer num : " + bufData.length + " (update : " + updated + ")<br>";
     for (var i = 0; i < bufData.length; i++) {
         parsedStr += "#";
     }
@@ -318,6 +319,24 @@ function greyer ( image, ratio ) {
                  128/((m_blu - 128)*ratio + 128) );
 }
 
+function greyer2 ( image, ratio ) {
+    if ( ratio < 0.0 || ratio > 1.0 ) return;
+    ratio = 1.0 - ratio;
+    for (var x = 0; x < image.width; x++) {
+        for (var y = 0; y < image.height; y++) {
+            var red = image.data[(y * image.width + x) * 4 + 0];
+            var grn = image.data[(y * image.width + x) * 4 + 1];
+            var blu = image.data[(y * image.width + x) * 4 + 2];
+            red = 128 - (128 - red)*ratio;
+            grn = 128 - (128 - grn)*ratio;
+            blu = 128 - (128 - blu)*ratio;
+            image.data[(y * image.width + x) * 4 + 0] = red;
+            image.data[(y * image.width + x) * 4 + 1] = grn;
+            image.data[(y * image.width + x) * 4 + 2] = blu;
+        }
+    }
+}
+
 var rfrctd;
 //var rfrctd_blu;
 //var rfrctd_grn;
@@ -332,8 +351,8 @@ function draw_canvas () {
     var src = bg_context.getImageData(0, 0, 640, 448);
     rfrctd = bg_context.createImageData(640, 448);
     refract(src, rfrctd);
-    greyer(rfrctd, 0.1);
-    //color_adjust(rfrctd,1.2,1.0,1.0);
+    greyer2(rfrctd, 0.1);
+    color_adjust(rfrctd,1.0,1.0,1.05);
 
     //rfrctd_blu = bg_context.createImageData(640, 448);
     //refract(src, rfrctd_blu);

@@ -87,7 +87,19 @@ function get_group_rect(group) {
 }
 
 function get_group (x, y) {
-    return fieldData[current][x][y];
+    var group = fieldData[current][x][y];
+    if ( group > 0) return group;
+    for ( var i = -2; i <= 2; i++ ) {
+        for ( var j = -2; j <= 2; j++ ) {
+            if (x + i < 0 || y + j < 0 || x + i >= x_width || y + j >= y_width ) {
+                continue;
+            }
+            if ( fieldData[current][x + i][y + j] > 0 ) {
+                return fieldData[current][x + i][y + j];
+            }
+        }
+    }
+    return group;
 }
 
 function get_neighbors (x, y) {
@@ -228,7 +240,8 @@ function set_alpha_block (image, x, y, alphas, heights, group) {
     for (var j = x*block_size; j < (x + 1)*block_size; j++) {
         for (var i = y*block_size; i < (y + 1)*block_size; i++) {
             alpha = linar255tbl[alphas.charAt(cur)];
-            by = linarByTbl[heights.charAt(cur++)];
+            by = linarByTbl[heights.charAt(cur)];
+            cur++;
             rectBy = get_rect_offset(j, i, rectMax, rectMin);
             image.data[(i * image.width + j) * 4 + 0] = byColor(layer.data[(i * image.width + j) * 4 + 0], by*rectBy);
             image.data[(i * image.width + j) * 4 + 1] = byColor(layer.data[(i * image.width + j) * 4 + 1], by*rectBy);
