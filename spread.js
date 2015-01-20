@@ -6,7 +6,10 @@ var running = false;
 var lasttime = "0";
 var bufData = new Array();
 var bufGroup = new Array();
+var bufHole = new Array();
+var bufDrop = new Array();
 var fieldData = new Array(2);
+var rectData = new Array(2);
 var current = 0;
 var prev = 1;
 
@@ -17,6 +20,8 @@ for ( x = 0; x < x_width; ++x) {
     fieldData[0][x] = new Array(y_width);
     fieldData[1][x] = new Array(y_width);
 }
+rectData[0] = new Array();
+rectData[1] = new Array();
 
 //         0         10        20        30        40        50        60
 //         +----+----+----+----+----+----+----+----+----+----+----+----+---
@@ -41,8 +46,11 @@ function init_field() {
     for ( x = 0; x < x_width; x++ ) {
         for ( y = 0; y < y_width; y++ ) {
             fieldData[current][x][y] = 0;
+            fieldData[prev][x][y] = 0;
         }
     }
+    rectData[0].length = 0;
+    rectData[1].length = 0;
 }
 
 function start() {
@@ -173,12 +181,18 @@ function toggleCurrentField() {
 function update_field()
 {
     var groupStr = "";
+    var holes = new Array();
+    var drops = new Array();
     var updated = 0;
     if ( bufData.length > 0 ) {
         str = bufData[0];
         bufData.shift();
         groupStr = bufGroup[0];
         bufGroup.shift();
+        holes = bufHole[0];
+        bufHole.shift();
+        drops = bufDrop[0];
+        bufDrop.shift();
         toggleCurrentField();
         de64code(str, groupStr);
         clear_rect_data();
@@ -187,7 +201,7 @@ function update_field()
         var image = context.getImageData(0, 0, block_size*x_width, block_size*y_width);
         for (var x = 0; x < x_width; x++) {
             for (var y = 0; y < y_width; y++) {
-                if ( is_neighbors_notzero(x, y) ) {
+                if ( is_block_changed(x, y) ) {
                    filter_alpha_block(image, x, y);
                    updated++;
                 }
@@ -200,7 +214,17 @@ function update_field()
     for (var i = 0; i < bufData.length; i++) {
         parsedStr += "#";
     }
-    parsedStr += "<br>";   
+    parsedStr += "<br>";
+    parsedStr += "num holes: " + holes.length + " ";
+    for (var i = 0; i < holes.length; i++) {
+        parsedStr += i + ":" + holes[i].textContent + " ";
+    }
+    parsedStr += "<br>";
+    parsedStr += "num drops: " + drops.length + " ";
+    for (var i = 0; i < drops.length; i++) {
+        parsedStr += i + ":" + drops[i].textContent + " ";
+    }
+    parsedStr += "<br>";
     parsedStr += get_num_filter_data() + "<br>";
 
     el = document.getElementById("buffernum");
@@ -210,7 +234,7 @@ function update_field()
     //el.innerHTML = groupStr;
 
     if ( running ) {
-        setTimeout('update_field()', 90);
+        setTimeout('update_field()', 70);
     }
 }
 
@@ -239,6 +263,8 @@ function update_buffer(str)
         //parsedStr += "map:" + data[i].getElementsByTagName("map")[0].textContent + "<br>";
         bufData.push(data[i].getElementsByTagName("map")[0].textContent);
         bufGroup.push(data[i].getElementsByTagName("group")[0].textContent);
+        bufHole.push(data[i].getElementsByTagName("holes")[0].getElementsByTagName("hole"));
+        bufDrop.push(data[i].getElementsByTagName("drops")[0].getElementsByTagName("drop"));
     }
     if ( data.length > 0 ) {
         parsedStr += "timestamp : " + data[0].getElementsByTagName("timestamp")[0].textContent;

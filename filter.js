@@ -2,7 +2,6 @@
 var neighborsData = new Array();
 var alphasData = new Array();
 var heightsData = new Array();
-var rectData = new Array();
 
 function filter_alpha_block (image, x, y) {
     var n = get_neighbors(x, y);
@@ -23,10 +22,12 @@ function filter_alpha_block (image, x, y) {
     heightsData.push(heights);
 }
 
-function is_neighbors_changed (x, y) {
+function is_block_changed (x, y) {
+    // self:
     if ( fieldData[current][x][y] != fieldData[prev][x][y] ) {
         return true;
     }
+    // neighbors:
     for ( var i = -2; i <= 2; i++ ) {
         for ( var j = -2; j <= 2; j++ ) {
             if ( x + i < 0 || y + j < 0 || x + i >= x_width || y + j >= y_width ) {
@@ -37,7 +38,27 @@ function is_neighbors_changed (x, y) {
             }
         }
     }
+    // group:
+    if ( fieldData[current][x][y] > 0 ) {
+        if ( is_group_changed(fieldData[current][x][y]) ) {
+            return true;
+        }
+    }
     return false;
+}
+
+function is_group_changed(group) {
+    var rect = get_group_rect(group);
+    for (var i = 0; i < rectData[prev].length; i++) {
+        if ( group == rectData[prev][i].group ) {
+            if ( rect.max == rectData[prev][i].max && rect.min == rectData[prev][i].min ) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+    return true;
 }
 
 function is_neighbors_notzero(x, y) {
@@ -61,13 +82,13 @@ function is_neighbors_notzero(x, y) {
 }
 
 function clear_rect_data() {
-    rectData.length = 0;
+    rectData[current].length = 0;
 }
 
 function get_group_rect(group) {
-    for (i = 0; i < rectData.length; i++) {
-        if ( rectData[i].group == group ) {
-            return rectData[i];
+    for (i = 0; i < rectData[current].length; i++) {
+        if ( rectData[current][i].group == group ) {
+            return rectData[current][i];
         }
     }
     var min = 1000;
@@ -82,7 +103,7 @@ function get_group_rect(group) {
         }
     }
     var rect = { group:group, min:min, max:max };
-    rectData.push(rect);
+    rectData[current].push(rect);
     return rect;
 }
 
