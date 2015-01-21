@@ -217,12 +217,12 @@ function update_field()
     parsedStr += "<br>";
     parsedStr += "num holes: " + holes.length + " ";
     for (var i = 0; i < holes.length; i++) {
-        parsedStr += i + ":" + holes[i].textContent + " ";
+        parsedStr += " [" + i + "] x:" + holes[i].x + " y:" + holes[i].y + " count:" + holes[i].count;
     }
     parsedStr += "<br>";
     parsedStr += "num drops: " + drops.length + " ";
     for (var i = 0; i < drops.length; i++) {
-        parsedStr += i + ":" + drops[i].textContent + " ";
+        parsedStr += " [" + i + "] x:" + drops[i].x + " y:" + drops[i].y + " spread:" + drops[i].spread;
     }
     parsedStr += "<br>";
     parsedStr += get_num_filter_data() + "<br>";
@@ -263,8 +263,22 @@ function update_buffer(str)
         //parsedStr += "map:" + data[i].getElementsByTagName("map")[0].textContent + "<br>";
         bufData.push(data[i].getElementsByTagName("map")[0].textContent);
         bufGroup.push(data[i].getElementsByTagName("group")[0].textContent);
-        bufHole.push(data[i].getElementsByTagName("holes")[0].getElementsByTagName("hole"));
-        bufDrop.push(data[i].getElementsByTagName("drops")[0].getElementsByTagName("drop"));
+        // holes:
+        var holes = new Array();
+        var holesData = data[i].getElementsByTagName("holes")[0].getElementsByTagName("hole");
+        for (var j = 0; j < holesData.length; j++) {
+            var h = holesData[j].textContent.split("|");
+            holes.push( { x:parseInt(h[0]), y:parseInt(h[1]), count:parseInt(h[2]) } );
+        }
+        bufHole.push(holes);
+        // drops:
+        var drops = new Array();
+        var dropsData = data[i].getElementsByTagName("drops")[0].getElementsByTagName("drop");
+        for (var j = 0; j < dropsData.length; j++) {
+            var h = dropsData[j].textContent.split("|");
+            drops.push( { x:parseInt(h[0]), y:parseInt(h[1]), spread:parseInt(h[2]) } );
+        }
+        bufDrop.push(drops);
     }
     if ( data.length > 0 ) {
         parsedStr += "timestamp : " + data[0].getElementsByTagName("timestamp")[0].textContent;
