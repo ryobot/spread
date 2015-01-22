@@ -208,8 +208,35 @@ function update_field()
             }
         }
         context.putImageData(image, 0, 0);
-    }
 
+        // holes:
+        for (var i = 0; i < 2; i++) {
+            var holeDiv = document.getElementById("bottle_" + ("0" + i).slice(-2));
+            if ( i < holes.length ) {
+                holeDiv.style.left = (block_size*holes[i].x - 28) + "px";
+                holeDiv.style.top = (block_size*holes[i].y - 10) + "px";
+                var holeCount = document.getElementById("bottle_" + ("0" + i).slice(-2) + "_count");
+                holeCount.innerHTML = holes[i].count.toString();
+                holeDiv.style.visibility = "visible";
+            } else {
+                holeDiv.style.visibility = "hidden";
+            }
+        }
+
+        // drops:
+        for (var i = 0; i < 2; i++) {
+            var dropDiv = document.getElementById("drop_" + ("0" + i).slice(-2));
+            if ( i < drops.length ) {
+                dropDiv.style.left = (block_size*drops[i].x - 18) + "px";
+                dropDiv.style.top = (block_size*drops[i].y - 18) + "px";
+                dropDiv.style.visibility = "visible";
+            } else {
+                dropDiv.style.visibility = "hidden";
+            }
+        }
+    }
+    
+    //// debug strings:
     var parsedStr = "buffer num : " + bufData.length + " (update : " + updated + ")<br>";
     for (var i = 0; i < bufData.length; i++) {
         parsedStr += "#";

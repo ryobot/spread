@@ -42,6 +42,10 @@ function changeImage(img_url) {
 <img src="<?php echo $img_url; ?>" id="bg_img" width="640" height="448" style="position: absolute; left: 0; top: 0; z-index: 0;">
 <canvas id="bg_canvas" width="640" height="448" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
 <canvas id="canvas" width="640" height="448" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
+<div id="bottle_00" style="position: absolute; z-index: 3; visibility: hidden;"><img src="bottle.png"><span id="bottle_00_count">0</span></div>
+<div id="bottle_01" style="position: absolute; z-index: 3; visibility: hidden;"><img src="bottle.png"><span id="bottle_01_count">0</span></div>
+<div id="drop_00" style="position: absolute; z-index: 3; visibility: hidden;"><img src="drop.png"></div>
+<div id="drop_01" style="position: absolute; z-index: 3; visibility: hidden;"><img src="drop.png"></div>
 </div>
 </div>
 <!-- 
