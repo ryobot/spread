@@ -19,6 +19,7 @@ for ($y = 0; $y < 112; $y++) {
 <title>spread test</title>
 <script src="filter.js" language="javascript"></script>
 <script src="refrction.js" language="javascript"></script>
+<script src="img_utils.js" language="javascript"></script>
 <script src="spread.js" language="javascript"></script>
 <script type="text/javascript">
 <!--

@@ -241,20 +241,25 @@ function byColor ( col, by ) {
     return val;
 }
 
+function diffColor ( col, by ) {
+    var val = col + 500*(by - 1.0);
+    if ( val > 255 ) {
+        val = 255;
+    }
+    if ( val < 0 ) {
+        val = 0;
+    }
+    return val;
+}
+
 function get_rect_offset(x, y, max, min) {
-    var val = 0.7 + 0.3*Math.cos(Math.PI*(x + y - min)/(max - min)/2);
+    var val = 0.3 + 0.7*Math.cos(Math.PI*(x + y - min)/(max - min)/2);
     return val;
 }
 
 function set_alpha_block (image, x, y, alphas, heights, group) {
     var cur = 0;
     var layer = rfrctd;
-    //if ( group%3 == 1 ) {
-    //    layer = rfrctd_blu;
-    //}
-    //if ( group%3 == 2 ) {
-    //    layer = rfrctd_grn;
-    //}
     var rect = get_group_rect(group);
     var rectMax = rect.max*block_size;
     var rectMin = rect.min*block_size;
@@ -267,6 +272,9 @@ function set_alpha_block (image, x, y, alphas, heights, group) {
             image.data[(i * image.width + j) * 4 + 0] = byColor(layer.data[(i * image.width + j) * 4 + 0], by*rectBy);
             image.data[(i * image.width + j) * 4 + 1] = byColor(layer.data[(i * image.width + j) * 4 + 1], by*rectBy);
             image.data[(i * image.width + j) * 4 + 2] = byColor(layer.data[(i * image.width + j) * 4 + 2], by*rectBy);
+            //image.data[(i * image.width + j) * 4 + 0] = diffColor(layer.data[(i * image.width + j) * 4 + 0], by*rectBy);
+            //image.data[(i * image.width + j) * 4 + 1] = diffColor(layer.data[(i * image.width + j) * 4 + 1], by*rectBy);
+            //image.data[(i * image.width + j) * 4 + 2] = diffColor(layer.data[(i * image.width + j) * 4 + 2], by*rectBy);
             image.data[(i * image.width + j) * 4 + 3] = alpha;
         }
     }

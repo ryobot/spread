@@ -321,6 +321,8 @@ function update_buffer(str)
     }
 }
 
+//// utils //////////////////////////////
+
 function draw_block (image, x, y, r, g, b, alpha) {
     for (var i = y*block_size; i < (y + 1)*block_size; i++) {
         for (var j = x*block_size; j < (x + 1)*block_size; j++) {
@@ -340,73 +342,7 @@ function alpha_block (image, x, y, alpha) {
     }
 }
 
-function color_adjust ( image, by_red, by_grn, by_blu ) {
-    for (var x = 0; x < image.width; x++) {
-        for (var y = 0; y < image.height; y++) {
-            // red
-            val = image.data[(y * image.width + x) * 4 + 0] * by_red;
-            if ( val > 255 ) {
-                val = 255
-            }
-            image.data[(y * image.width + x) * 4 + 0] = val;
-            // green
-            val = image.data[(y * image.width + x) * 4 + 1] * by_grn;
-            if ( val > 255 ) {
-                val = 255
-            }
-            image.data[(y * image.width + x) * 4 + 1] = val;
-            // blue
-            val = image.data[(y * image.width + x) * 4 + 2] * by_blu;
-            if ( val > 255 ) {
-                val = 255
-            }
-            image.data[(y * image.width + x) * 4 + 2] = val;	 
-        }
-    }
-}
-
-function greyer ( image, ratio ) {
-    var m_red = 0;
-    var m_grn = 0;
-    var m_blu = 0;
-    for (var x = 0; x < image.width; x++) {
-        for (var y = 0; y < image.height; y++) {
-            m_red += image.data[(y * image.width + x) * 4 + 0];
-            m_grn += image.data[(y * image.width + x) * 4 + 1];
-            m_blu += image.data[(y * image.width + x) * 4 + 2];
-        }
-    }
-    m_red /= image.width*image.height;
-    m_grn /= image.width*image.height;
-    m_blu /= image.width*image.height;
-
-    color_adjust( image,
-                 128/((m_red - 128)*ratio + 128),
-                 128/((m_grn - 128)*ratio + 128),
-                 128/((m_blu - 128)*ratio + 128) );
-}
-
-function greyer2 ( image, ratio ) {
-    if ( ratio < 0.0 || ratio > 1.0 ) return;
-    ratio = 1.0 - ratio;
-    for (var x = 0; x < image.width; x++) {
-        for (var y = 0; y < image.height; y++) {
-            var red = image.data[(y * image.width + x) * 4 + 0];
-            var grn = image.data[(y * image.width + x) * 4 + 1];
-            var blu = image.data[(y * image.width + x) * 4 + 2];
-            red = 128 - (128 - red)*ratio;
-            grn = 128 - (128 - grn)*ratio;
-            blu = 128 - (128 - blu)*ratio;
-            image.data[(y * image.width + x) * 4 + 0] = red;
-            image.data[(y * image.width + x) * 4 + 1] = grn;
-            image.data[(y * image.width + x) * 4 + 2] = blu;
-        }
-    }
-}
-
 var rfrctd;
-//var rfrctd_blu;
-//var rfrctd_grn;
 
 function draw_canvas () {
     var bg_img = document.getElementById("bg_img");
@@ -418,18 +354,9 @@ function draw_canvas () {
     var src = bg_context.getImageData(0, 0, 640, 448);
     rfrctd = bg_context.createImageData(640, 448);
     refract(src, rfrctd);
-    greyer2(rfrctd, 0.1);
+    //greyer2(rfrctd, 0.1);
+    normalize(rfrctd, 0.5);
     color_adjust(rfrctd,1.0,1.0,1.05);
 
-    //rfrctd_blu = bg_context.createImageData(640, 448);
-    //refract(src, rfrctd_blu);
-    //greyer(rfrctd_blu, 0.2);
-    //color_adjust(rfrctd_blu,1.0,1.0,1.2);
-    
-    //rfrctd_grn = bg_context.createImageData(640, 448);
-    //refract(src, rfrctd_grn);
-    //greyer(rfrctd_grn, 0.2);
-    //color_adjust(rfrctd_grn,1.0,1.2,1.0);
-    
     init_tables();
 }
